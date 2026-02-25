@@ -32,6 +32,9 @@ restart_browser() {
     fi
 }
 
+# Ensure Homebrew is on PATH (launchd runs with a minimal environment)
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 log "=== Browser update started ==="
 
 # Prevent system sleep for the duration of this script
