@@ -22,6 +22,11 @@ restart_browser() {
 
 log "=== Browser update started ==="
 
+# Prevent system sleep for the duration of this script
+caffeinate -i -w $$ &
+CAFFEINATE_PID=$!
+log "caffeinate started (PID $CAFFEINATE_PID)"
+
 if command -v brew &>/dev/null; then
     log "Homebrew found — running brew upgrade --cask"
     brew upgrade --cask google-chrome brave-browser 2>&1 | while IFS= read -r line; do
@@ -50,4 +55,5 @@ fi
 restart_browser "Google Chrome"
 restart_browser "Brave Browser"
 
+kill "$CAFFEINATE_PID" 2>/dev/null
 log "=== Browser update finished ==="
