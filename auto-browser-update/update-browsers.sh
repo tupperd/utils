@@ -2,10 +2,22 @@
 # update-browsers.sh — Keep Brave and Chrome up to date via Homebrew
 
 LOG="$HOME/Library/Logs/update-browsers.log"
-TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 log() {
-    echo "[$TIMESTAMP] $*" | tee -a "$LOG"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG"
+}
+
+restart_browser() {
+    local app="$1"
+    if pgrep -xq "$app"; then
+        log "$app is running — quitting for update..."
+        osascript -e "tell application \"$app\" to quit"
+        sleep 3
+        log "Relaunching $app..."
+        open -a "$app"
+    else
+        log "$app is not running — skipping restart"
+    fi
 }
 
 log "=== Browser update started ==="
@@ -13,7 +25,7 @@ log "=== Browser update started ==="
 if command -v brew &>/dev/null; then
     log "Homebrew found — running brew upgrade --cask"
     brew upgrade --cask google-chrome brave-browser 2>&1 | while IFS= read -r line; do
-        echo "[$TIMESTAMP] $line" >> "$LOG"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $line" >> "$LOG"
     done
     STATUS=${PIPESTATUS[0]}
     if [ "$STATUS" -eq 0 ]; then
@@ -26,7 +38,7 @@ else
     GSU="/Library/Google/GoogleSoftwareUpdate/GoogleSoftwareUpdate.bundle/Contents/MacOS/GoogleSoftwareUpdate"
     if [ -x "$GSU" ]; then
         "$GSU" --check-and-update 2>&1 | while IFS= read -r line; do
-            echo "[$TIMESTAMP] $line" >> "$LOG"
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] $line" >> "$LOG"
         done
         log "Google Software Update finished"
     else
@@ -34,5 +46,8 @@ else
     fi
     log "WARNING: Brave Browser requires Homebrew or a manual download to update automatically"
 fi
+
+restart_browser "Google Chrome"
+restart_browser "Brave Browser"
 
 log "=== Browser update finished ==="

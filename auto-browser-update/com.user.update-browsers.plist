@@ -8,13 +8,13 @@
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/davidtupper/update-browsers.sh</string>
+        <string>/Users/davidtupper/playground/utils/auto-browser-update/update-browsers.sh</string>
     </array>
 
     <key>StartCalendarInterval</key>
     <dict>
         <key>Hour</key>
-        <integer>9</integer>
+        <integer>2</integer>
         <key>Minute</key>
         <integer>0</integer>
     </dict>
