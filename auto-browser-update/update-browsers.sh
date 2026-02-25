@@ -41,15 +41,20 @@ log "caffeinate started (PID $CAFFEINATE_PID)"
 
 if command -v brew &>/dev/null; then
     log "Homebrew found — running brew upgrade --cask"
-    brew upgrade --cask google-chrome brave-browser 2>&1 | while IFS= read -r line; do
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $line" | tee -a "$SYS_LOG" "$EXEC_LOG"
+    for CASK in google-chrome brave-browser; do
+        BREW_OUT=$(brew upgrade --cask "$CASK" 2>&1)
+        STATUS=$?
+        echo "$BREW_OUT" | while IFS= read -r line; do
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$CASK] $line" | tee -a "$SYS_LOG" "$EXEC_LOG"
+        done
+        if [ "$STATUS" -eq 0 ]; then
+            log "[$CASK] upgrade completed successfully"
+        elif echo "$BREW_OUT" | grep -q "is not installed"; then
+            log "[$CASK] not installed via Homebrew — skipping"
+        else
+            fail "[$CASK] upgrade failed with status $STATUS"
+        fi
     done
-    STATUS=${PIPESTATUS[0]}
-    if [ "$STATUS" -eq 0 ]; then
-        log "brew upgrade completed successfully"
-    else
-        fail "brew upgrade failed with status $STATUS"
-    fi
 else
     log "Homebrew not found — falling back to Google Software Update for Chrome"
     GSU="/Library/Google/GoogleSoftwareUpdate/GoogleSoftwareUpdate.bundle/Contents/MacOS/GoogleSoftwareUpdate"
